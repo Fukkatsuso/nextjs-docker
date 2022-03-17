@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: develop
+    container_name: app
+    ports:
+      - 3000:3000
+    tty: true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    working_dir: /app
