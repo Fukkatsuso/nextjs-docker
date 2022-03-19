@@ -1,0 +1,45 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/**"
+
+env:
+  NEXTJS_IMAGE: asia.gcr.io/${{ secrets.GCP_PROJECT }}/nextjs-docker
+
+jobs:
+  terraform-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.7
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        env:
+          TF_VAR_project: ${{ secrets.GCP_PROJECT }}
+          TF_VAR_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
+          TF_VAR_container_image: ${{ env.NEXTJS_IMAGE }}
+
+      - name: Terraform Plan
+        run: terraform plan
+        env:
+          TF_VAR_project: ${{ secrets.GCP_PROJECT }}
+          TF_VAR_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
+          TF_VAR_container_image: ${{ env.NEXTJS_IMAGE }}
