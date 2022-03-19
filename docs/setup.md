@@ -94,8 +94,8 @@ gcloud iam service-accounts keys create ~/${PROJECT_ID}/${SA_NAME}/key.json \
 ```bash
 # role
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-   --member="serviceAccount:${IAM_ACCOUNT}" \
-   --role="roles/editor"
+  --member="serviceAccount:${IAM_ACCOUNT}" \
+  --role="roles/editor"
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --member="serviceAccount:${IAM_ACCOUNT}" \
   --role="roles/run.admin" # allUsersへのアクセス権付与のためにadmin権限が必要
