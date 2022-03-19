@@ -18,11 +18,20 @@ provider "google" {
   region  = var.region
 }
 
+# Enable the Cloud Resource Manager API
+resource "google_project_service" "crm_api" {
+  service = "cloudresourcemanager.googleapis.com"
+
+  disable_on_destroy = true
+}
+
 # Enable the Cloud Run API
 resource "google_project_service" "run_api" {
   service = "run.googleapis.com"
 
   disable_on_destroy = true
+
+  depends_on = [google_project_service.crm_api]
 }
 
 resource "google_cloud_run_service" "app" {
