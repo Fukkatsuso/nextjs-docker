@@ -129,7 +129,7 @@ gsutil mb -l ${REGION} gs://${BACKEND_BUCKET}
 
 ## GitHub Actions
 
-- pull request => fmt, init, validate, gcp-auth, plan
+- pull request => fmt, init, gcp-auth, validate, plan
 - push main => init, gcp-auth, plan, docker-build, docker-push, apply
 - `terraform plan` の実行にはGCP認証が必要
 
