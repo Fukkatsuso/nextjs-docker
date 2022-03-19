@@ -27,11 +27,13 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: terraform
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 
       - name: Terraform Validate
         run: terraform validate
+        working-directory: terraform
         env:
           TF_VAR_project: ${{ secrets.GCP_PROJECT }}
           TF_VAR_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
@@ -39,6 +41,7 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: terraform
         env:
           TF_VAR_project: ${{ secrets.GCP_PROJECT }}
           TF_VAR_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
