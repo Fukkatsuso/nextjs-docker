@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "README.md"
+      - ".gitignore"
+    types:
+      - "closed"
+
+env:
+  NEXTJS_IMAGE: asia.gcr.io/${{ secrets.GCP_PROJECT }}/nextjs-docker
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.1.7
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Google auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: terraform
+        env:
+          TF_VAR_project: ${{ secrets.GCP_PROJECT }}
+          TF_VAR_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
+          TF_VAR_container_image: ${{ env.NEXTJS_IMAGE }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: Configure docker to use the gcloud cli
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build the docker image
+        run: docker build -f Dockerfile --target runner -t $NEXTJS_IMAGE .
+
+      - name: Push the docker image
+        run: docker push $NEXTJS_IMAGE
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: terraform
+        env:
+          TF_VAR_project: ${{ secrets.GCP_PROJECT }}
+          TF_VAR_credentials: ${{ secrets.GOOGLE_CREDENTIALS }}
+          TF_VAR_container_image: ${{ env.NEXTJS_IMAGE }}
